@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  name: devfile-registry
+spec:
+  selector: {}
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - image: quay.io/redhat-user-workloads/mvaldron-tenant/devfile-registry/devfile-registry@sha256:722e0cea6d0863c0028dd0b4392f8cdb856e395fcb45302fa9fa7b48e24cc0ee
+        name: devfile-registry
+        resources: {}
+status: {}
