@@ -33,7 +33,7 @@ spec:
       - env:
         - name: REGISTRY_NAME
         - name: TELEMETRY_KEY
-        image: quay.io/devfile/devfile-index:next
+        image: quay.io/redhat-user-workloads/mvaldron-tenant/devfile-registry/devfile-registry@sha256:722e0cea6d0863c0028dd0b4392f8cdb856e395fcb45302fa9fa7b48e24cc0ee
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
