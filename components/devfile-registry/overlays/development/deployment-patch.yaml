@@ -11,7 +11,7 @@ spec:
       creationTimestamp: null
     spec:
       containers:
-      - image: quay.io/redhat-user-workloads/mvaldron-tenant/devfile-registry/devfile-registry@sha256:722e0cea6d0863c0028dd0b4392f8cdb856e395fcb45302fa9fa7b48e24cc0ee
+      - image: quay.io/redhat-user-workloads/mvaldron-tenant/devfile-registry/devfile-registry@sha256:ec67e76927235cdf12f7de7a1423169e093d40eb22b99e4ed90ff3986aef3862
         name: devfile-registry
         resources: {}
 status: {}
