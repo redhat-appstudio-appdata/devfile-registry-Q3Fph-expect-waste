@@ -1,0 +1,153 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: devfile-registry
+    app.kubernetes.io/created-by: application-service
+    app.kubernetes.io/instance: devfile-registry
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: devfile-registry
+    app.kubernetes.io/part-of: devfile-registry
+  name: devfile-registry
+spec:
+  replicas: 1
+  revisionHistoryLimit: 0
+  selector:
+    matchLabels:
+      app: devfile-registry
+      app.kubernetes.io/instance: devfile-registry
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: devfile-registry
+        app.kubernetes.io/instance: devfile-registry
+    spec:
+      containers:
+      - env:
+        - name: REGISTRY_NAME
+        - name: TELEMETRY_KEY
+        image: quay.io/devfile/devfile-index:next
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 3
+        name: devfile-registry
+        ports:
+        - containerPort: 8080
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 10m
+            memory: 256Mi
+        startupProbe:
+          httpGet:
+            path: /viewer
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 20
+      - env:
+        - name: NEXT_PUBLIC_ANALYTICS_WRITE_KEY
+        - name: DEVFILE_REGISTRIES
+          value: '[{"name":"Community","url":"http://localhost:8080","fqdn":"https://registry.stage.devfile.io"}]'
+        image: quay.io/devfile/registry-viewer:next
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /viewer
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 20
+        name: devfile-registry-viewer
+        readinessProbe:
+          httpGet:
+            path: /viewer
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          timeoutSeconds: 20
+        resources:
+          limits:
+            cpu: 250m
+            memory: 256Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        volumeMounts:
+        - mountPath: /app/.env.production
+          name: viewer-env-file
+          readOnly: true
+          subPath: .env.production
+      - image: quay.io/devfile/oci-registry:next
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /v2
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+        name: oci-registry
+        readinessProbe:
+          httpGet:
+            path: /v2
+            port: 5000
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          timeoutSeconds: 3
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
+          requests:
+            cpu: 1m
+            memory: 5Mi
+        volumeMounts:
+        - mountPath: /var/lib/registry
+          name: devfile-registry-storage
+        - mountPath: /etc/docker/registry
+          name: config
+          readOnly: true
+      serviceAccountName: devfile-registry-service-account
+      volumes:
+      - emptyDir: {}
+        name: devfile-registry-storage
+      - configMap:
+          items:
+          - key: registry-config.yml
+            path: config.yml
+          name: devfile-registry
+        name: config
+      - configMap:
+          items:
+          - key: .env.registry-viewer
+            path: .env.production
+          name: devfile-registry
+        name: viewer-env-file
+status: {}

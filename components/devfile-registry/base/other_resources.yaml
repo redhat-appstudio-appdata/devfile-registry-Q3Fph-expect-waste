@@ -1,0 +1,38 @@
+apiVersion: v1
+data:
+  .env.registry-viewer: |
+    NEXT_PUBLIC_ANALYTICS_WRITE_KEY=
+    DEVFILE_REGISTRIES=[{"name":"Community","url":"http://localhost:8080","fqdn":"https://registry.stage.devfile.io"}]
+  registry-config.yml: |
+    version: 0.1
+    log:
+      fields:
+        service: registry
+    storage:
+      cache:
+        blobdescriptor: inmemory
+      filesystem:
+        rootdirectory: /var/lib/registry
+    http:
+      addr: :5000
+      headers:
+        X-Content-Type-Options: [nosniff]
+      debug:
+        addr: :5001
+        prometheus:
+          enabled: true
+          path: /metrics
+kind: ConfigMap
+metadata:
+  annotations:
+    qontract.recycle: "true"
+    registry.version: 2ca701f108df91385368c620cc23cc65b38aaf77
+  name: devfile-registry
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: devfile-registry
+  name: devfile-registry-service-account
+---
